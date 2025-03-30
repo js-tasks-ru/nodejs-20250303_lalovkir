@@ -44,6 +44,10 @@ export class TasksService {
   ): Task[] {
     let tasks = status ? this.tasks.filter((task) => task.status === status) : this.tasks;
 
+    if (status && tasks.length === 0) {
+      throw new NotFoundException();
+    }
+
     if (sortBy) {
       tasks.sort((a, b) => a[sortBy].localeCompare(b[sortBy]));
     }
@@ -52,10 +56,6 @@ export class TasksService {
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       tasks = tasks.slice(startIndex, endIndex);
-    }
-
-    if (tasks.length === 0) {
-      throw new NotFoundException();
     }
 
     return tasks;
