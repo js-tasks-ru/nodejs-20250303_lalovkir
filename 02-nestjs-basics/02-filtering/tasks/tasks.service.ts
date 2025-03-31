@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { Task, TaskStatus } from "./task.model";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { SortBy, Task, TaskStatus } from "./task.model";
 
 @Injectable()
 export class TasksService {
@@ -40,5 +40,24 @@ export class TasksService {
     status?: TaskStatus,
     page?: number,
     limit?: number,
-  ): Task[] {}
+    sortBy?: SortBy,
+  ): Task[] {
+    let tasks = status ? this.tasks.filter((task) => task.status === status) : this.tasks;
+
+    if (status && tasks.length === 0) {
+      throw new NotFoundException();
+    }
+
+    if (sortBy) {
+      tasks.sort((a, b) => a[sortBy].localeCompare(b[sortBy]));
+    }
+
+    if (page && limit) {
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      tasks = tasks.slice(startIndex, endIndex);
+    }
+
+    return tasks;
+  }
 }
